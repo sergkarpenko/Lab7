@@ -1,22 +1,24 @@
+using Microsoft.EntityFrameworkCore;
 using System.Data.Entity;
 
 namespace Lab7_1
 {
     public partial class AnimalManager : Form
     {
-        private Context _context;
+        private readonly Context _context;
 
         public AnimalManager()
         {
             InitializeComponent();
 
-            _context = Context.GetInstance();
+            _context = Context.Instance;
+            _context.Database.EnsureCreated();
+            //_context.Database.
 
+            _context.Animals.Load();
             _context.Biomes.Load();
-            _context.Eat.Load();
-            _context.Biomes.Load();
-            _context.AnimalEat.Load();
-            _context.AnimalClass.Load();
+            _context.Eats.Load();
+            _context.Klasses.Load();
             
 
             AddListViewAnimals();
@@ -24,21 +26,16 @@ namespace Lab7_1
 
         private void AddListViewAnimals()
         {
-            var animals = _context.Animals
-                .Include(b => b.AnimalBiomes).Select(q => q);
-
-            foreach (var an in animals)
+            lvAnimals.Items.Clear();
+            foreach (var animal in _context.Animals.ToList())
             {
-                
-                
-                ListViewItem lvi = new ListViewItem($"{an.AnimalBiomes}");
-                lvi.SubItems.Add(an.Name);
-                lvi.SubItems.Add($"{an.LimbCount}");
+                ListViewItem lvi = new ListViewItem($"{animal.Biome}");
+                lvi.SubItems.Add(animal.Name);
+                lvi.SubItems.Add($"{animal.LimbCount}");
 
-                string biome = an.AnimalBiomes.AnimalBiomes;
-                lvi.SubItems.Add(biome);
-                lvi.SubItems.Add($"{an.AnimalClass.ClassName}");
-                //lvi.SubItems.Add($"{string.Join(" ",an.AnimalEats)}");
+                lvi.SubItems.Add(animal.Biome.Name);
+                lvi.SubItems.Add($"{animal.Klass.Name}");
+                lvi.SubItems.Add(string.Join(", ", animal.Eats.Select(n => n.Name)));
                 lvAnimals.Items.Add(lvi);
             }
         }
@@ -48,6 +45,7 @@ namespace Lab7_1
             Add add = new Add();
 
             add.ShowDialog();
+            AddListViewAnimals();
         }
     }
 }

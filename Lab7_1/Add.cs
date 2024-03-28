@@ -16,7 +16,7 @@ namespace Lab7_1
         {
             InitializeComponent();
 
-            _context = Context.GetInstance();
+            _context = Context.Instance;
 
             _functions.Add(AddAnimal);
             _functions.Add(AddEat);
@@ -40,13 +40,13 @@ namespace Lab7_1
 
             try
             {
-                List<string> eats = [.. _context.Eat.Select(b => b.EatName)];
+                List<string> eats = [.. _context.Eats.Select(b => b.Name)];
                 clbAnimalEat.Items.AddRange(eats.ToArray());
 
-                List<string> biomes = [.. _context.Biomes.Select(b => b.AnimalBiomes)];
+                List<string> biomes = [.. _context.Biomes.Select(b => b.Name)];
                 lbBiomes.Items.AddRange(biomes.ToArray());
 
-                List<string> classAnimals =[.. _context.AnimalClass.Select(b => b.ClassName).ToList()];
+                List<string> classAnimals =[.. _context.Klasses.Select(b => b.Name).ToList()];
                 lbClasses.Items.AddRange(classAnimals.ToArray());
             }
             catch
@@ -93,27 +93,24 @@ namespace Lab7_1
 
 
             List<string> selectedFoodNames = clbAnimalEat.CheckedItems.Cast<string>().ToList();
-            List<Eat> selectedEats = _context.Eat.Where(e => selectedFoodNames.Contains(e.EatName)).ToList();
+            List<Eat> selectedEats = _context.Eats.Where(e => selectedFoodNames.Contains(e.Name)).ToList();
 
 
 
             List<string> selectedBiomesNames = lbBiomes.SelectedItems.Cast<string>().ToList();
-            List<Biomes> biomes = _context.Biomes.Where(b => selectedBiomesNames.Contains(b.AnimalBiomes)).ToList(); 
+            List<Biome> biomes = _context.Biomes.Where(b => selectedBiomesNames.Contains(b.Name)).ToList(); 
             
             List<string> selectedAnimalClassNames = lbClasses.SelectedItems.Cast<string>().ToList();
-            List<AnimalClass> classes = _context.AnimalClass.Where(ac 
-                => selectedAnimalClassNames.Contains(ac.ClassName)).ToList();
+            List<Klass> classes = _context.Klasses.Where(ac 
+                => selectedAnimalClassNames.Contains(ac.Name)).ToList();
 
             Animal animal = new Animal
             {
                 Name = tbAnimalName.Text,
                 LimbCount = (int)nudLimbCount.Value,
-                AnimalEats = selectedEats.Select(eat => new AnimalEat
-                {
-                    Eat = eat
-                }).ToList(),
-                AnimalBiomes = _context.Biomes.Where(b => selectedBiomesNames.Contains(b.AnimalBiomes)).FirstOrDefault(),
-                AnimalClass = _context.AnimalClass.Where(ac => selectedAnimalClassNames.Contains(ac.ClassName)).FirstOrDefault()
+                Eats = [.. selectedEats],
+                Biome = _context.Biomes.Where(b => selectedBiomesNames.Contains(b.Name)).FirstOrDefault(),
+                Klass = _context.Klasses.Where(ac => selectedAnimalClassNames.Contains(ac.Name)).FirstOrDefault()
             };
 
             return animal;
@@ -128,13 +125,13 @@ namespace Lab7_1
                 return;
             }
 
-            if (AddNotRepeatValidation(_context.Eat, b => b.EatName == tbEatName.Text))
+            if (AddNotRepeatValidation(_context.Eats, b => b.Name == tbEatName.Text))
             {
                 MessageBox.Show("Таке ім'я вже існує.");
                 return;
             }
 
-            _context.Add(new Eat { EatName = tbEatName.Text, Calories = (int)nudCalories.Value });
+            _context.Add(new Eat { Name = tbEatName.Text, Calories = (int)nudCalories.Value });
             SaveAndExit();
         }
 
@@ -147,14 +144,14 @@ namespace Lab7_1
                 return;
             }
 
-            if (AddNotRepeatValidation(_context.Biomes, b => b.AnimalBiomes == tbBiomeName.Text))
+            if (AddNotRepeatValidation(_context.Biomes, b => b.Name == tbBiomeName.Text))
             {
                 MessageBox.Show("Таке ім'я вже існує.");
                 return;
             }
 
 
-            _context.Add(new Biomes { AnimalBiomes = tbBiomeName.Text });
+            _context.Add(new Biome { Name = tbBiomeName.Text });
             SaveAndExit();
         }
 
@@ -165,13 +162,13 @@ namespace Lab7_1
                 MessageBox.Show("Неправильно введені поля.");
                 return;
             }
-            if (AddNotRepeatValidation(_context.AnimalClass, b => b.ClassName == tbClassName.Text))
+            if (AddNotRepeatValidation(_context.Klasses, b => b.Name == tbClassName.Text))
             {
                 MessageBox.Show("Таке ім'я вже існує.");
                 return;
             }
 
-            _context.Add(new AnimalClass { ClassName = tbClassName.Text });
+            _context.Add(new Klass { Name = tbClassName.Text });
             SaveAndExit();
         }
 
